@@ -1,14 +1,12 @@
 {
-  "users": [
+  "projects": [
     {
-      "name": "user001",
-      "password": "12345",
-      "role": "admin"
+      "name": "project001",
+      "desc": "Project 001"
     },
     {
-      "name": "user002",
-      "password": "12345",
-      "role": "user"
+      "name": "Project002",
+      "desc": "Project 002"
     }
   ]
 }

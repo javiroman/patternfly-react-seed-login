@@ -19,7 +19,9 @@
     "bundle-profile:analyze": "yarn build:bundle-profile && webpack-bundle-analyzer ./stats.json",
     "clean": "rimraf dist",
     "storybook": "start-storybook -p 6006",
-    "build:storybook": "build-storybook"
+    "build:storybook": "build-storybook",
+    "mock-server": "json-server --watch mock-server/db.json",
+    "mock-auth": "node mock-server/server.js"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^5.2.5",
@@ -84,6 +86,7 @@
     "@patternfly/react-icons": "^3.14.28",
     "@patternfly/react-styles": "^3.6.15",
     "json-server": "^0.16.0",
+    "jsonwebtoken": "^8.5.1",
     "react-router-dom": "^5.0.1",
     "react-router-last-location": "^2.0.1"
   }

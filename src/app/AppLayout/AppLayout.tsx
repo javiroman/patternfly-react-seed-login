@@ -11,6 +11,7 @@ import {
   SkipToContent
 } from '@patternfly/react-core';
 import { routes } from '@app/routes';
+import { AppLogin } from '@app/AppLogin/AppLogin';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -67,6 +68,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
     </SkipToContent>
   );
   return (
+    <AppLogin />
+    /*
     <Page
       mainContainerId="primary-app-container"
       header={Header}
@@ -75,6 +78,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
       skipToContent={PageSkipToContent}>
       {children}
     </Page>
+     */
   );
 }
 
