@@ -85,6 +85,7 @@
     "@patternfly/react-core": "^3.129.3",
     "@patternfly/react-icons": "^3.14.28",
     "@patternfly/react-styles": "^3.6.15",
+    "js-cookie": "^2.2.1",
     "json-server": "^0.16.0",
     "jsonwebtoken": "^8.5.1",
     "react-router-dom": "^5.0.1",
