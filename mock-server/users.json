@@ -2,16 +2,16 @@
   "users": [
     {
       "id": 1,
-      "name": "user01",
-      "email": "user01",
-      "password": "user01",
+      "name": "Admin User",
+      "email": "admin",
+      "password": "AdminAdmin",
       "role": "admin"
     },
     {
       "id": 2,
-      "name": "user02",
-      "email": "user02",
-      "password": "user02",
+      "name": "Regular User",
+      "email": "user",
+      "password": "UserUser",
       "role": "user"
     }
   ]

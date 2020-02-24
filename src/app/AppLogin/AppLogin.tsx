@@ -69,7 +69,6 @@ class AppLogin extends React.Component {
         if (content.status !== 401) {
           Cookies.set('jwt-example-cookie', content);
           let json = this.parseJwt(Cookies.getJSON('jwt-example-cookie').access_token);
-          console.log("LoginPage cookie: ", json);
           this.props.handleLogin(true, json);
         }
       })();
@@ -80,12 +79,9 @@ class AppLogin extends React.Component {
     let value = {};
     value = Cookies.getJSON('jwt-example-cookie');
     if (value) {
-      console.log("LoginPage: JWT stored, alreadyLoged -> true");
       this.setState({ alreadyLoged: true });
     } else {
-      console.log("LoginPage: JWT not stored");
       this.setState({ alreadyLoged: false});
-      console.log(this.state.alreadyLoged);
     }
   }
 

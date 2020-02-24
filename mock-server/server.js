@@ -45,13 +45,15 @@ server.post('/auth/login', (req, res) => {
   }
 
   let role = '';
+  let name= '';
   for (var user of userdb.users) {
       if (user.email === email) {
-        role = user.role
+        role = user.role;
+        name = user.name;
       }
   }
 
-  const access_token = createToken({email, password, role})
+  const access_token = createToken({email, password, role, name})
   console.log("Access Token: " + access_token);
   res.status(200).json({access_token})
 })

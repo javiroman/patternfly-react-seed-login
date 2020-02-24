@@ -42,6 +42,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
   const [isDropdownOpen, setDropdownOpen] = React.useState(false);
   const [isKebabDropdownOpen, setKebabDropdownOpen] = React.useState(false);
   const [isLoged, setIsLoged] = React.useState(false);
+  const [isUser, setIsUser] = React.useState("anonymous");
 
   const parseJwt = (token) => {
     try {
@@ -81,15 +82,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
   };
 
   const onHandleLogin = (value, cookie) => {
-    console.log("AppLayout: onHandleLogin");
     setIsLoged(value);
-    location.reload();
   }
 
     const onDropdownSelect = event => {
     setDropdownOpen(!isDropdownOpen);
     Cookies.remove('jwt-example-cookie', { path: '/'});
     setIsLoged(false);
+    location.reload();
   };
 
   const onKebabDropdownToggle = event => {
@@ -98,6 +98,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
 
   const onKebabDropdownSelect = event => {
     setKebabDropdownOpen(!isKebabDropdownOpen);
+  };
+
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
   };
 
   const PageToolbar = (
@@ -131,7 +139,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
             position="right"
             onSelect={onDropdownSelect}
             isOpen={isDropdownOpen}
-            toggle={<DropdownToggle onToggle={onDropdownToggle}>Javi Roman</DropdownToggle>}
+            toggle={<DropdownToggle onToggle={onDropdownToggle}>{isUser}</DropdownToggle>}
             dropdownItems={userDropdownItems}
           />
         </ToolbarItem>
@@ -178,6 +186,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
     value = Cookies.getJSON('jwt-example-cookie');
     if (value) {
       setIsLoged(true);
+      setIsUser(parseJwt(value.access_token).name);
     }
   }, []);
 
