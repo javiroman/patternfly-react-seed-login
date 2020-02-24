@@ -15,10 +15,10 @@ export interface ISupportProps {
   sampleProp?: string;
 }
 
-const Support: React.FunctionComponent<ISupportProps> = () => (
-    <PageSection>
-      <Title size="lg">Support Page Title</Title>
-    </PageSection>
-  )
+const Admin: React.FunctionComponent<ISupportProps> = () => (
+  <PageSection>
+    <Title size="lg">Admin Page Title</Title>
+  </PageSection>
+)
 
-export { Support };
+export { Admin };

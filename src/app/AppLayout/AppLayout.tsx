@@ -8,9 +8,23 @@ import {
   Page,
   PageHeader,
   PageSidebar,
-  SkipToContent
+  SkipToContent,
+  ToolbarGroup,
+  ToolbarItem,
+  Button,
+  Dropdown,
+  KebabToggle,
+  DropdownToggle,
+  ButtonVariant,
+  DropdownItem,
+  Toolbar
 } from '@patternfly/react-core';
 import { routes } from '@app/routes';
+import { BellIcon, CogIcon } from '@patternfly/react-icons';
+import accessibleStyles from '@patternfly/react-styles/css/utilities/Accessibility/accessibility';
+import spacingStyles from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import { css } from '@patternfly/react-styles';
+import Cookies from 'js-cookie';
 import { AppLogin } from '@app/AppLogin/AppLogin';
 
 interface IAppLayout {
@@ -25,25 +39,111 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
   const [isNavOpen, setIsNavOpen] = React.useState(true);
   const [isMobileView, setIsMobileView] = React.useState(true);
   const [isNavOpenMobile, setIsNavOpenMobile] = React.useState(false);
+  const [isDropdownOpen, setDropdownOpen] = React.useState(false);
+  const [isKebabDropdownOpen, setKebabDropdownOpen] = React.useState(false);
   const [isLoged, setIsLoged] = React.useState(false);
 
-  const onHandleLogin = (value) => {
-    setIsLoged(value);
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
   };
+
   const onNavToggleMobile = () => {
     setIsNavOpenMobile(!isNavOpenMobile);
   };
+
   const onNavToggle = () => {
     setIsNavOpen(!isNavOpen);
   };
+
   const onPageResize = (props: { mobileView: boolean; windowSize: number }) => {
     setIsMobileView(props.mobileView);
   };
+
+  const kebabDropdownItems = [
+    <DropdownItem>
+      <BellIcon /> Notifications
+    </DropdownItem>,
+    <DropdownItem>
+      <CogIcon /> Settings
+    </DropdownItem>
+  ];
+
+  const userDropdownItems = [
+    <DropdownItem key={0}>Logout</DropdownItem>,
+  ];
+
+  const onDropdownToggle = event => {
+    setDropdownOpen(!isDropdownOpen);
+  };
+
+  const onHandleLogin = (value, cookie) => {
+    console.log("AppLayout: onHandleLogin");
+    setIsLoged(value);
+    location.reload();
+  }
+
+    const onDropdownSelect = event => {
+    setDropdownOpen(!isDropdownOpen);
+    Cookies.remove('jwt-example-cookie', { path: '/'});
+    setIsLoged(false);
+  };
+
+  const onKebabDropdownToggle = event => {
+    setKebabDropdownOpen(!isKebabDropdownOpen)
+  };
+
+  const onKebabDropdownSelect = event => {
+    setKebabDropdownOpen(!isKebabDropdownOpen);
+  };
+
+  const PageToolbar = (
+    <Toolbar>
+      <ToolbarGroup className={css(accessibleStyles.screenReader, accessibleStyles.visibleOnLg)}>
+        <ToolbarItem>
+          <Button id="default-example-uid-01" aria-label="Notifications actions" variant={ButtonVariant.plain}>
+            <BellIcon />
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button id="default-example-uid-02" aria-label="Settings actions" variant={ButtonVariant.plain}>
+            <CogIcon />
+          </Button>
+        </ToolbarItem>
+      </ToolbarGroup>
+      <ToolbarGroup>
+        <ToolbarItem className={css(accessibleStyles.hiddenOnLg, spacingStyles.mr_0)}>
+          <Dropdown
+            isPlain
+            position="right"
+            onSelect={onKebabDropdownSelect}
+            toggle={<KebabToggle onToggle={onKebabDropdownToggle} />}
+            isOpen={isKebabDropdownOpen}
+            dropdownItems={kebabDropdownItems}
+          />
+        </ToolbarItem>
+        <ToolbarItem className={css(accessibleStyles.screenReader, accessibleStyles.visibleOnMd)}>
+          <Dropdown
+            isPlain
+            position="right"
+            onSelect={onDropdownSelect}
+            isOpen={isDropdownOpen}
+            toggle={<DropdownToggle onToggle={onDropdownToggle}>Javi Roman</DropdownToggle>}
+            dropdownItems={userDropdownItems}
+          />
+        </ToolbarItem>
+      </ToolbarGroup>
+    </Toolbar>
+  );
+
   const Header = (
     <PageHeader
       logo="Patternfly"
       logoProps={logoProps}
-      toolbar="Toolbar"
+      toolbar={PageToolbar}
       showNavToggle
       isNavOpen={isNavOpen}
       onNavToggle={isMobileView ? onNavToggleMobile : onNavToggle}
@@ -72,9 +172,19 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
       Skip to Content
     </SkipToContent>
   );
-  return (
-    isLoged?
 
+  React.useEffect(() => {
+    let value = {};
+    value = Cookies.getJSON('jwt-example-cookie');
+    if (value) {
+      setIsLoged(true);
+    }
+  }, []);
+
+  return (
+    ! isLoged?
+      <AppLogin handleLogin={onHandleLogin}/>
+      :
       <Page
         mainContainerId="primary-app-container"
         header={Header}
@@ -83,11 +193,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
         skipToContent={PageSkipToContent}>
         {children}
       </Page>
-
-      :
-
-    <AppLogin handleLogin={onHandleLogin} />
-
   );
 }
 
