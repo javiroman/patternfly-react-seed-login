@@ -11,6 +11,7 @@ import {
 } from '@patternfly/react-core';
 import { ExclamationCircleIcon } from '@patternfly/react-icons';
 import Cookies from 'js-cookie';
+import { Redirect } from "react-router-dom";
 
 class AppLogin extends React.Component {
   constructor(props) {
@@ -21,7 +22,8 @@ class AppLogin extends React.Component {
       isValidUsername: true,
       passwordValue: '',
       isValidPassword: true,
-      isRememberMeChecked: false
+      isRememberMeChecked: false,
+      alreadyLoged: false
     };
 
     this.handleUsernameChange = value => {
@@ -58,15 +60,29 @@ class AppLogin extends React.Component {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({"email": this.state.usernameValue,
-              "password": this.state.passwordValue})
+            body: JSON.stringify({
+              "email": this.state.usernameValue,
+              "password": this.state.passwordValue
+            })
           });
         const content = await rawResponse.json();
 
-        Cookies.set('jwt-example-cookie', content);
-        console.log(this.parseJwt(Cookies.getJSON('jwt-example-cookie').access_token));
+        if (content.status !== 401) {
+          Cookies.set('jwt-example-cookie', content);
+          console.log(this.parseJwt(Cookies.getJSON('jwt-example-cookie').access_token));
+          this.props.handleLogin(true);
+        }
       })();
     };
+  }
+
+  public componentDidMount(): void {
+    let value = {};
+    value = Cookies.getJSON('jwt-example-cookie');
+    if (value) {
+      console.log("JWT cookie stored");
+      this.setState({ alreadyLoged: true });
+    }
   }
 
   render() {
@@ -116,7 +132,14 @@ class AppLogin extends React.Component {
       />
     );
 
+
     return (
+      ! this.alreadyLoged?
+
+        null
+
+        :
+
       <LoginPage
         footerListVariants="inline"
         brandImgAlt="PatternFly logo"
@@ -124,11 +147,11 @@ class AppLogin extends React.Component {
         textContent="This is placeholder text only. Use this area to place any information or introductory message about your application that may be relevant to users."
         loginTitle="Log in to your account"
         loginSubtitle="Please use mock server backend credentials users.json"
-        forgotCredentials={forgotCredentials}
-      >
+        forgotCredentials={forgotCredentials}>
         {loginForm}
       </LoginPage>
-    );
+    )
+
   }
 }
 

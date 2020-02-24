@@ -25,12 +25,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
   const [isNavOpen, setIsNavOpen] = React.useState(true);
   const [isMobileView, setIsMobileView] = React.useState(true);
   const [isNavOpenMobile, setIsNavOpenMobile] = React.useState(false);
+  const [isLoged, setIsLoged] = React.useState(false);
+
+  const onHandleLogin = (value) => {
+    setIsLoged(value);
+  };
   const onNavToggleMobile = () => {
     setIsNavOpenMobile(!isNavOpenMobile);
   };
   const onNavToggle = () => {
     setIsNavOpen(!isNavOpen);
-  }
+  };
   const onPageResize = (props: { mobileView: boolean; windowSize: number }) => {
     setIsMobileView(props.mobileView);
   };
@@ -68,17 +73,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({children}) => {
     </SkipToContent>
   );
   return (
-    <AppLogin />
-    /*
-    <Page
-      mainContainerId="primary-app-container"
-      header={Header}
-      sidebar={Sidebar}
-      onPageResize={onPageResize}
-      skipToContent={PageSkipToContent}>
-      {children}
-    </Page>
-     */
+    isLoged?
+
+      <Page
+        mainContainerId="primary-app-container"
+        header={Header}
+        sidebar={Sidebar}
+        onPageResize={onPageResize}
+        skipToContent={PageSkipToContent}>
+        {children}
+      </Page>
+
+      :
+
+    <AppLogin handleLogin={onHandleLogin} />
+
   );
 }
 
