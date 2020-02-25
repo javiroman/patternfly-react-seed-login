@@ -1,7 +1,14 @@
 import * as React from 'react';
-import { PageSection, Title, Button, EmptyState, EmptyStateVariant, EmptyStateIcon } from '@patternfly/react-core';
-import Cookies from 'js-cookie';
+import {
+  PageSection,
+  Title,
+  Button,
+  EmptyState,
+  EmptyStateVariant,
+  EmptyStateIcon
+} from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
+import Cookies from 'js-cookie';
 
 const Dashboard: React.FunctionComponent<{}> = () => {
   const [isLoged, setIsLoged] = React.useState(false);
@@ -12,7 +19,6 @@ const Dashboard: React.FunctionComponent<{}> = () => {
 
   function handleClick(e) {
     e.preventDefault();
-    console.log('The link was clicked.');
     window.location.reload();
   }
 
@@ -20,10 +26,7 @@ const Dashboard: React.FunctionComponent<{}> = () => {
     let value = {};
     value = Cookies.getJSON('jwt-example-cookie');
     if (value) {
-      console.log("JWT cookie stored");
       setIsLoged(true);
-    } else {
-      console.log("JWT cookie not stored");
     }
   }, []);
 
