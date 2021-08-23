@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CubesIcon } from '@patternfly/react-icons';
 import {
   PageSection,
   Title,
@@ -6,13 +7,18 @@ import {
   EmptyState,
   EmptyStateVariant,
   EmptyStateIcon,
+  EmptyStateBody,
+  EmptyStateSecondaryActions,
   Spinner
 } from '@patternfly/react-core';
-import { CubesIcon } from '@patternfly/react-icons';
 import { AppLogin  } from "@app/AppLogin/AppLogin";
 import Cookies from 'js-cookie';
 
-const Dashboard: React.FunctionComponent<{}> = () => {
+export interface ISupportProps {
+  sampleProp?: string;
+}
+
+const Admin: React.FunctionComponent<ISupportProps> = () => {
   const [isLoged, setIsLoged] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -45,10 +51,10 @@ const Dashboard: React.FunctionComponent<{}> = () => {
 
     :
 
-      <PageSection>
-        <Title headingLevel="h1" size="lg">Dashboard Page Title!</Title>
-      </PageSection>
-    )
+  <PageSection>
+    <Title headingLevel="h1" size="lg">Admin Page Title</Title>
+  </PageSection>
+ )
 }
 
-export { Dashboard };
+export { Admin };

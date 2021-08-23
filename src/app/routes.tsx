@@ -3,15 +3,18 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { accessibleRouteChangeHandler } from '@app/utils/utils';
 import { Dashboard } from '@app/Dashboard/Dashboard';
 import { Support } from '@app/Support/Support';
-import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
-import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
+import { Admin } from '@app/Admin/Admin';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { LastLocationProvider, useLastLocation } from 'react-router-last-location';
+import Cookies from 'js-cookie';
+
+/* FIXME: no original routes from project */
 
 let routeFocusTimer: number;
+
 export interface IAppRoute {
-  label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
+  label?: string;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
   /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -19,52 +22,74 @@ export interface IAppRoute {
   path: string;
   title: string;
   isAsync?: boolean;
-  routes?: undefined;
 }
 
-export interface IAppRouteGroup {
-  label: string;
-  routes: IAppRoute[];
+let routes: IAppRoute[] = [];
+
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
 }
 
-export type AppRouteConfig = IAppRoute | IAppRouteGroup;
+const generateRoutes = () => {
+  let role = parseJwt(Cookies.getJSON('jwt-example-cookie').access_token);
 
-const routes: AppRouteConfig[] = [
-  {
-    component: Dashboard,
-    exact: true,
-    label: 'Dashboard',
-    path: '/',
-    title: 'PatternFly Seed | Main Dashboard',
-  },
-  {
-    component: Support,
-    exact: true,
-    isAsync: true,
-    label: 'Support',
-    path: '/support',
-    title: 'PatternFly Seed | Support Page',
-  },
-  {
-    label: 'Settings',
-    routes: [
+  let theroutes: IAppRoute = [];
+
+  if (role.role === "admin") {
+    theroutes = [
       {
-        component: GeneralSettings,
+        component: Dashboard,
         exact: true,
-        label: 'General',
-        path: '/settings/general',
-        title: 'PatternFly Seed | General Settings',
+        label: 'Dashboard',
+        path: '/',
+        title: 'Main Dashboard Title'
       },
       {
-        component: ProfileSettings,
+        component: Support,
         exact: true,
-        label: 'Profile',
-        path: '/settings/profile',
-        title: 'PatternFly Seed | Profile Settings',
+        isAsync: true,
+        label: 'Support',
+        path: '/support',
+        title: 'Support Page Title'
       },
-    ],
-  },
-];
+      {
+        component: Admin,
+        exact: true,
+        isAsync: true,
+        label: 'Admin',
+        path: '/admin',
+        title: 'Admin Page'
+      }
+    ];
+  } else {
+    theroutes = [
+      {
+        component: Dashboard,
+        exact: true,
+        label: 'Dashboard',
+        path: '/',
+        title: 'Main Dashboard Title'
+      },
+      {
+        component: Support,
+        exact: true,
+        isAsync: true,
+        label: 'Support',
+        path: '/support',
+        title: 'Support Page Title'
+      }
+    ];
+  }
+
+  routes = theroutes;
+
+  return theroutes;
+}
+
 
 // a custom hook for sending focus to the primary content container
 // after a view has loaded so that subsequent press of tab key
@@ -76,20 +101,28 @@ const useA11yRouteChange = (isAsync: boolean) => {
       routeFocusTimer = accessibleRouteChangeHandler();
     }
     return () => {
-      window.clearTimeout(routeFocusTimer);
+      clearTimeout(routeFocusTimer);
     };
   }, [isAsync, lastNavigation]);
-};
+}
 
-const RouteWithTitleUpdates = ({ component: Component, isAsync = false, title, ...rest }: IAppRoute) => {
+
+const RouteWithTitleUpdates = ({
+  component: Component,
+  isAsync = false,
+  title,
+  ...rest
+}: IAppRoute) => {
   useA11yRouteChange(isAsync);
   useDocumentTitle(title);
 
   function routeWithTitle(routeProps: RouteComponentProps) {
-    return <Component {...rest} {...routeProps} />;
+    return (
+      <Component {...rest} {...routeProps} />
+    );
   }
 
-  return <Route render={routeWithTitle} {...rest}/>;
+  return <Route render={routeWithTitle} />;
 };
 
 const PageNotFound = ({ title }: { title: string }) => {
@@ -97,27 +130,30 @@ const PageNotFound = ({ title }: { title: string }) => {
   return <Route component={NotFound} />;
 };
 
-const flattenedRoutes: IAppRoute[] = routes.reduce(
-  (flattened, route) => [...flattened, ...(route.routes ? route.routes : [route])],
-  [] as IAppRoute[]
-);
-
-const AppRoutes = (): React.ReactElement => (
-  <LastLocationProvider>
-    <Switch>
-      {flattenedRoutes.map(({ path, exact, component, title, isAsync }, idx) => (
-        <RouteWithTitleUpdates
-          path={path}
-          exact={exact}
-          component={component}
-          key={idx}
-          title={title}
-          isAsync={isAsync}
-        />
-      ))}
-      <PageNotFound title="404 Page Not Found" />
-    </Switch>
-  </LastLocationProvider>
+const AppRoutes = () => (
+      <LastLocationProvider>
+        <Switch>
+          {
+             generateRoutes().map(({
+                         path,
+                         exact,
+                         component,
+                         title,
+                         isAsync
+                         }, idx) => (
+                  <RouteWithTitleUpdates
+                    path={path}
+                    exact={exact}
+                    component={component}
+                    key={idx}
+                    title={title}
+                    isAsync={isAsync}
+                  />
+            ))
+          }
+          <PageNotFound title="404 Page Not Found"/>
+        </Switch>
+      </LastLocationProvider>
 );
 
 export { AppRoutes, routes };

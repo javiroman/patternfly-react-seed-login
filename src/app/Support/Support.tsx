@@ -8,15 +8,50 @@ import {
   EmptyStateVariant,
   EmptyStateIcon,
   EmptyStateBody,
-  EmptyStateSecondaryActions
+  EmptyStateSecondaryActions,
+  Spinner
 } from '@patternfly/react-core';
+import { AppLogin  } from "@app/AppLogin/AppLogin";
+import Cookies from 'js-cookie';
 
 export interface ISupportProps {
   sampleProp?: string;
 }
 
 // eslint-disable-next-line prefer-const
-let Support: React.FunctionComponent<ISupportProps> = () => (
+let Support: React.FunctionComponent<ISupportProps> = () => {
+  const [isLoged, setIsLoged] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const onHandleLogin = (value) => {
+    setIsLoged(value);
+  }
+
+  React.useEffect(() => {
+    let value = {};
+    value = Cookies.getJSON('jwt-example-cookie');
+    if (value) {
+      setIsLoged(true);
+      } else {
+      setIsLoading(true);
+      setIsLoged(false);
+      location.reload();
+    }
+  }, []);
+
+  return (
+    isLoading?
+
+      <EmptyState variant={EmptyStateVariant.full}>
+        <Spinner/>
+      </EmptyState>
+
+    : ! isLoged?
+
+      <AppLogin handleLogin={onHandleLogin}/>
+
+    :
+
   <PageSection>
     <EmptyState variant={EmptyStateVariant.full}>
       <EmptyStateIcon icon={CubesIcon} />
@@ -38,6 +73,7 @@ let Support: React.FunctionComponent<ISupportProps> = () => (
       </EmptyStateSecondaryActions>
     </EmptyState>
   </PageSection>
-)
+ )
+}
 
 export { Support };
