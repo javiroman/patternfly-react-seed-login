@@ -3,18 +3,16 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { accessibleRouteChangeHandler } from '@app/utils/utils';
 import { Dashboard } from '@app/Dashboard/Dashboard';
 import { Support } from '@app/Support/Support';
+import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
+import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
-import { Admin } from '@app/Admin/Admin';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { LastLocationProvider, useLastLocation } from 'react-router-last-location';
 import Cookies from 'js-cookie';
 
-/* FIXME: no original routes from project */
-
 let routeFocusTimer: number;
-
 export interface IAppRoute {
-  label?: string;
+  label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
   /* eslint-disable @typescript-eslint/no-explicit-any */
   component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
   /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -22,9 +20,15 @@ export interface IAppRoute {
   path: string;
   title: string;
   isAsync?: boolean;
+  routes?: undefined;
 }
 
-let routes: IAppRoute[] = [];
+export interface IAppRouteGroup {
+  label: string;
+  routes: IAppRoute[];
+}
+
+export type AppRouteConfig = IAppRoute | IAppRouteGroup;
 
 const parseJwt = (token) => {
   try {
@@ -35,18 +39,18 @@ const parseJwt = (token) => {
 }
 
 const generateRoutes = () => {
-  let role = parseJwt(Cookies.getJSON('jwt-example-cookie').access_token);
+  const role = parseJwt(Cookies.getJSON('jwt-example-cookie').access_token);
 
-  let theroutes: IAppRoute = [];
+  let theRoutes: AppRouteConfig[];
 
   if (role.role === "admin") {
-    theroutes = [
+    theRoutes = [
       {
         component: Dashboard,
         exact: true,
         label: 'Dashboard',
         path: '/',
-        title: 'Main Dashboard Title'
+        title: 'PatternFly Seed | Main Dashboard',
       },
       {
         component: Support,
@@ -54,42 +58,51 @@ const generateRoutes = () => {
         isAsync: true,
         label: 'Support',
         path: '/support',
-        title: 'Support Page Title'
+        title: 'PatternFly Seed | Support Page',
       },
       {
-        component: Admin,
-        exact: true,
-        isAsync: true,
-        label: 'Admin',
-        path: '/admin',
-        title: 'Admin Page'
-      }
-    ];
-  } else {
-    theroutes = [
-      {
-        component: Dashboard,
-        exact: true,
-        label: 'Dashboard',
-        path: '/',
-        title: 'Main Dashboard Title'
+        label: 'Settings',
+        routes: [
+          {
+            component: GeneralSettings,
+            exact: true,
+            label: 'General',
+            path: '/settings/general',
+            title: 'PatternFly Seed | General Settings',
+          },
+          {
+            component: ProfileSettings,
+            exact: true,
+            label: 'Profile',
+            path: '/settings/profile',
+            title: 'PatternFly Seed | Profile Settings',
+          },
+        ],
       },
-      {
-        component: Support,
-        exact: true,
-        isAsync: true,
-        label: 'Support',
-        path: '/support',
-        title: 'Support Page Title'
-      }
     ];
-  }
-
-  routes = theroutes;
-
-  return theroutes;
+    } else {
+      theRoutes = [
+        {
+          component: Dashboard,
+          exact: true,
+          label: 'Dashboard',
+          path: '/',
+          title: 'PatternFly Seed | Main Dashboard',
+        },
+        {
+          component: Support,
+          exact: true,
+          isAsync: true,
+          label: 'Support',
+          path: '/support',
+          title: 'PatternFly Seed | Support Page',
+        },
+      ];
+    }
+  return theRoutes;
 }
 
+const routes: AppRouteConfig[] = generateRoutes();
 
 // a custom hook for sending focus to the primary content container
 // after a view has loaded so that subsequent press of tab key
@@ -101,28 +114,20 @@ const useA11yRouteChange = (isAsync: boolean) => {
       routeFocusTimer = accessibleRouteChangeHandler();
     }
     return () => {
-      clearTimeout(routeFocusTimer);
+      window.clearTimeout(routeFocusTimer);
     };
   }, [isAsync, lastNavigation]);
-}
+};
 
-
-const RouteWithTitleUpdates = ({
-  component: Component,
-  isAsync = false,
-  title,
-  ...rest
-}: IAppRoute) => {
+const RouteWithTitleUpdates = ({ component: Component, isAsync = false, title, ...rest }: IAppRoute) => {
   useA11yRouteChange(isAsync);
   useDocumentTitle(title);
 
   function routeWithTitle(routeProps: RouteComponentProps) {
-    return (
-      <Component {...rest} {...routeProps} />
-    );
+    return <Component {...rest} {...routeProps} />;
   }
 
-  return <Route render={routeWithTitle} />;
+  return <Route render={routeWithTitle} {...rest}/>;
 };
 
 const PageNotFound = ({ title }: { title: string }) => {
@@ -130,30 +135,27 @@ const PageNotFound = ({ title }: { title: string }) => {
   return <Route component={NotFound} />;
 };
 
-const AppRoutes = () => (
-      <LastLocationProvider>
-        <Switch>
-          {
-             generateRoutes().map(({
-                         path,
-                         exact,
-                         component,
-                         title,
-                         isAsync
-                         }, idx) => (
-                  <RouteWithTitleUpdates
-                    path={path}
-                    exact={exact}
-                    component={component}
-                    key={idx}
-                    title={title}
-                    isAsync={isAsync}
-                  />
-            ))
-          }
-          <PageNotFound title="404 Page Not Found"/>
-        </Switch>
-      </LastLocationProvider>
+const flattenedRoutes: IAppRoute[] = routes.reduce(
+  (flattened, route) => [...flattened, ...(route.routes ? route.routes : [route])],
+  [] as IAppRoute[]
+);
+
+const AppRoutes = (): React.ReactElement => (
+  <LastLocationProvider>
+    <Switch>
+      {flattenedRoutes.map(({ path, exact, component, title, isAsync }, idx) => (
+        <RouteWithTitleUpdates
+          path={path}
+          exact={exact}
+          component={component}
+          key={idx}
+          title={title}
+          isAsync={isAsync}
+        />
+      ))}
+      <PageNotFound title="404 Page Not Found" />
+    </Switch>
+  </LastLocationProvider>
 );
 
 export { AppRoutes, routes };

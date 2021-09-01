@@ -11,19 +11,12 @@ import Cookies from 'js-cookie';
 const App: React.FunctionComponent = () => {
   const [isLoged, setIsLoged] = React.useState(false);
 
-  const parseJwt = (token) => {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
-      return null;
-    }
-  };
-
   const onHandleLogin = (value) => {
     setIsLoged(value);
   }
 
   React.useEffect(() => {
+    console.log("QUE HOSTIAS");
     let value = {};
     value = Cookies.getJSON('jwt-example-cookie');
     if (value) {
@@ -31,7 +24,7 @@ const App: React.FunctionComponent = () => {
     }
   }, []);
 
-return (
+  return (
     ! isLoged?
       <AppLogin handleLogin={onHandleLogin}/>
       :
