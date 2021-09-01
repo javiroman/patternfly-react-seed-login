@@ -16,7 +16,7 @@ const App: React.FunctionComponent = () => {
   }
 
   React.useEffect(() => {
-    console.log("QUE HOSTIAS");
+    console.log("RENDER");
     let value = {};
     value = Cookies.getJSON('jwt-example-cookie');
     if (value) {
@@ -25,8 +25,8 @@ const App: React.FunctionComponent = () => {
   }, []);
 
   return (
-    ! isLoged?
-      <AppLogin handleLogin={onHandleLogin}/>
+     ! isLoged?
+      <AppLogin handleLogin={onHandleLogin} />
       :
       <Router>
         <AppLayout>
