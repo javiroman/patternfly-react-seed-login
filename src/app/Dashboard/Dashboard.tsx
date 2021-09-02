@@ -28,7 +28,7 @@ const Dashboard: React.FunctionComponent<{}> = () => {
       } else {
       setIsLoading(true);
       setIsLoged(false);
-      location.reload();
+      location.reload(false);
     }
   }, []);
 

@@ -10,8 +10,10 @@ import {
   PageSidebar,
   SkipToContent
 } from '@patternfly/react-core';
-import { routes, IAppRoute, IAppRouteGroup } from '@app/routes';
+import { generateRoutes, IAppRoute, IAppRouteGroup } from '@app/routes';
 import logo from '@app/bgimages/Patternfly-Logo.svg';
+import { AppLogin  } from "@app/AppLogin/AppLogin";
+import Cookies from 'js-cookie';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -21,6 +23,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [isNavOpen, setIsNavOpen] = React.useState(true);
   const [isMobileView, setIsMobileView] = React.useState(true);
   const [isNavOpenMobile, setIsNavOpenMobile] = React.useState(false);
+  const [isLoged, setIsLoged] = React.useState(false);
+
   const onNavToggleMobile = () => {
     setIsNavOpenMobile(!isNavOpenMobile);
   };
@@ -30,6 +34,18 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const onPageResize = (props: { mobileView: boolean; windowSize: number }) => {
     setIsMobileView(props.mobileView);
   };
+
+  const onHandleLogin = (value) => {
+    setIsLoged(value);
+  };
+
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+}
 
   function LogoImg() {
     const history = useHistory();
@@ -65,7 +81,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       key={`${group.label}-${groupIndex}`}
       id={`${group.label}-${groupIndex}`}
       title={group.label}
-      isActive={group.routes.some((route) => route.path === location.pathname)}
+          isActive={group.routes.some((route) => route.path === location.pathname)}
     >
       {group.routes.map((route, idx) => route.label && renderNavItem(route, idx))}
     </NavExpandable>
@@ -74,8 +90,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const Navigation = (
     <Nav id="nav-primary-simple" theme="dark">
       <NavList id="nav-list-simple">
-        {routes.map(
-          (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
+        {
+        generateRoutes().map(
+          (route, idx) => route.label && 
+            (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
         )}
       </NavList>
     </Nav>
@@ -99,7 +117,23 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       Skip to Content
     </SkipToContent>
   );
+
+  React.useEffect(() => {
+    let value = {};
+    value = Cookies.getJSON('jwt-example-cookie');
+    if (value) {
+      setIsLoged(true);
+    } else {
+      //setIsLoading(true);
+      setIsLoged(false);
+      window.location.reload(false);
+   } 
+  }, []);
+
   return (
+    !isLoged ?
+      <AppLogin handleLogin={onHandleLogin} />
+      :
     <Page
       mainContainerId={pageId}
       header={Header}

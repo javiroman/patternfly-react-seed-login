@@ -16,11 +16,12 @@ const App: React.FunctionComponent = () => {
   }
 
   React.useEffect(() => {
-    console.log("RENDER");
     let value = {};
     value = Cookies.getJSON('jwt-example-cookie');
     if (value) {
       setIsLoged(true);
+    } else {
+      setIsLoged(false);
     }
   }, []);
 
@@ -28,11 +29,11 @@ const App: React.FunctionComponent = () => {
      ! isLoged?
       <AppLogin handleLogin={onHandleLogin} />
       :
-      <Router>
-        <AppLayout>
-          <AppRoutes />
-        </AppLayout>
-      </Router>
+       <Router>
+         <AppLayout>
+           <AppRoutes />
+         </AppLayout>
+       </Router>
     )
 };
 
